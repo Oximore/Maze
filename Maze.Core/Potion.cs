@@ -8,16 +8,7 @@ namespace Maze.Core
 {
     public class Potion
     {
-        public static Potion CreateRandom()
-        {
-            Random random = new Random();
-            return random.Next(0, 5) switch
-            {
-                0 => new ExperiencePotion(),
-                1 => new MajorHealthPotion(),
-                _ => new MinorHealthPotion(),
-            };
-        }
+
 
         public string Name { get; private set; } = "";
         public int Amount { get; private set; }
@@ -54,7 +45,7 @@ namespace Maze.Core
         public override void Affect(Player player)
         {
             base.Affect(player);
-            player.Experience += Amount;
+            player.GainExperience(Amount);
         }
     }
 }

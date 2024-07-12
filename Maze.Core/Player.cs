@@ -1,11 +1,11 @@
 ﻿namespace Maze.Core
 {
-    public class Player
+    public class Player : IPlayer
     {
-        private int maxHealthPoint = 100;
+        public int MaxHealthPoint => 100;
         private int healthPoint;
 
-        public string Name { get; } = ""; // Propriété
+        public string Name { get; } = "Player"; // Propriété
 
         public int HealthPoint
         {
@@ -16,24 +16,57 @@
             }
         }
 
-        public bool IsAlive { get => HealthPoint > 0; }
+        public bool IsAlive => HealthPoint > 0;
 
-        public int Experience { get; set; } = 0;
+        public int Experience { get; private set; } = 0;
+        // private int attackPoint;
+        public int AttackPoint { get; private set; }
 
+        public double CriticalChance => 20;
 
         public Player(string name)
         {
             Name = name;
-            HealthPoint = maxHealthPoint;
+            HealthPoint = MaxHealthPoint;
+            AttackPoint = 15;
         }
 
         public void TakeDamage(int hitPoint)
         {
             HealthPoint -= hitPoint;
         }
-        public void Heal(int healthPoint)
+
+        public void Heal(int amount)
         {
-            HealthPoint += healthPoint;
+            HealthPoint += amount;
         }
+
+        public void GainExperience(int amount)
+        {
+            Experience += amount;
+        }
+
+        public void Attack(ILiveEntity entity)
+        {
+            int random = Dice.random.Next(0, 100);
+            if (random == 0)
+            { }
+            else if (random < CriticalChance * 100)
+            {
+                entity.TakeDamage(2 * AttackPoint);
+            }
+            else
+            {
+                entity.TakeDamage(AttackPoint);
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"{Name} [{HealthPoint} PV, {Experience} XP]";
+        }
+
+
+        public void AttributsHaveChanged() { }
     }
 }

@@ -1,22 +1,20 @@
 ﻿namespace Maze.Core
 {
-    public class Trap
+    public class Trap : ICanDamage
     {
-        public static Trap CreateRandom()
-        {
-            Random random = new Random();
-            int hitPoint = random.Next(1, 34);
-
-            return new Trap("piège à pointe", hitPoint);
-        }
-
         public string Name { get; private set; } = "";
-        public int HitPoint { get; private set; }
+        public int AttackPoint { get; private set; }
+                
 
-        public Trap(string name, int hitPoint)
+        internal Trap(string name, int hitPoint)
         {
             Name = name;
-            HitPoint = hitPoint;
+            AttackPoint = hitPoint;
+        }
+
+        public void Attack(ILiveEntity entity)
+        {
+            entity.TakeDamage(AttackPoint);
         }
     }
 }

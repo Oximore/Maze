@@ -28,6 +28,7 @@ namespace Maze.Core
 
         public event Action<Game, Trap>? PlayerTakedTrap;
         public event Action<Game, Potion>? PotionFound;
+        public event Action<Game, Monster>? MonsterEncounter;
 
         public Game(string name)
         {
@@ -36,21 +37,29 @@ namespace Maze.Core
 
         public void Play()
         {
-            Random random = new Random();
-
-            switch (random.Next(0, 5))
+            switch (Dice.random.Next(0, 5))
             {
                 case 0: // trap encouter
-                    Trap trap = Trap.CreateRandom();
-                    Player.TakeDamage(trap.HitPoint);
+                    Trap trap = GameObjectFactory.CreateTrap();
+                    trap.Attack(Player);
                     PlayerTakedTrap?.Invoke(this, trap);
                     break;
 
-                    case 1: // Potion
-                        Potion potion = Potion.CreateRandom();
+                case 1: // Potion
+                    Potion potion = GameObjectFactory.CreatePotion();
                     potion.Affect(Player);
                     PotionFound?.Invoke(this, potion);
+                    break;
 
+                case 2: // Monster
+                    Monster monster = GameObjectFactory.CreateMonster();
+                    // monster.Affect(Player);
+                    Fight(Player, monster);
+                    if (Player.IsAlive)
+                    {
+                        Player.GainExperience(monster.ExperienceReward);
+                    }
+                    MonsterEncounter?.Invoke(this, monster);
                     break;
                 default: // nothing happend
                     break;
@@ -61,7 +70,7 @@ namespace Maze.Core
                 return;
             }
 
-            switch (random.Next(0, 3))
+            switch (Dice.random.Next(0, 3))
             {
                 case 0: // left
                     //TODO try / catch events, it is foreing code
@@ -80,6 +89,16 @@ namespace Maze.Core
                 default:
                     Debug.WriteLine($"---- {nameof(Game)} Erreur de tirage");
                     break;
+            }
+        }
+
+        private void Fight(IFighter fighter1, IFighter fighter2)
+        {
+            while(fighter1.IsAlive && fighter2.IsAlive)
+            {
+
+                fighter1.Attack(fighter2);
+                fighter2.Attack(fighter1);
             }
         }
     }

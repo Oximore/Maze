@@ -1,11 +1,16 @@
 ﻿using Maze.Core;
+using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 
 namespace Maze.Cmd
 {
+    using static Crayon.Output;
+
     internal class Program
     {
+
         private static void Main(string[] args)
         {
             Console.WriteLine("Bonjour, aventurier !");
@@ -23,12 +28,13 @@ namespace Maze.Cmd
 
             game.PlayerMoved += Game_PlayerMoved;
             game.PlayerTakedTrap += Game_PlayerTakedTrap;
-            game.PotionFound += Game_PotionFound; ;
+            game.PotionFound += Game_PotionFound;
+            game.MonsterEncounter += Game_MonsterEncounter;
 
             while (game.Player.IsAlive)
             {
                 game.Play();
-                Thread.Sleep(250);
+                Thread.Sleep(150);
             }
 
             Console.WriteLine("");
@@ -38,33 +44,37 @@ namespace Maze.Cmd
             game.PlayerMoved -= Game_PlayerMoved; // On doit se désabonner !
             // Sinon pb mémoire
             game.PlayerTakedTrap -= Game_PlayerTakedTrap;
+            game.MonsterEncounter -= Game_MonsterEncounter;
+        }
+
+        private static void Game_MonsterEncounter(Game game, Monster monster)
+        {
+            Console.WriteLine(Yellow($"Vous rencontrez un monstrer {Bold(monster.Name)}, il vous reste {game.Player.HealthPoint} PV"));
         }
 
         private static void Game_PotionFound(Game game, Potion potion)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Vous avez trouvé une {potion.Name}, vous gagnez {potion.Amount}, il vous avez {game.Player.HealthPoint} hp");
-            Console.ResetColor();
+            Console.WriteLine(Green($"Vous avez trouvé une {Bold(potion.Name)}, vous gagnez {potion.Amount}, il vous avez {game.Player.HealthPoint} PV"));
         }
 
         private static void Game_PlayerTakedTrap(Game game, Trap trap)
         {
-            Console.WriteLine($"Vous vous êtes pris un {trap.Name}, vous perdez {trap.HitPoint}, il vous reste {game.Player.HealthPoint}");
+            Console.WriteLine(Red($"Vous vous êtes pris un {Bold(trap.Name)}, vous perdez {trap.AttackPoint}, il vous reste {game.Player.HealthPoint} PV"));
         }
 
         private static void Game_PlayerMoved(object? sender, PlayerMovedEventArgs args)
         {
             if (sender is Game game)
             {
-                Console.Write($"{game.Player.Name} se diriger vers ");
+                Console.Write($"{game.Player} se dirige ");
                 switch (args.Direction)
                 {
                     case PlayerDirection.Left:
-                        Console.WriteLine("la gauche");
+                        Console.WriteLine("vers la gauche");
                         break;
 
                     case PlayerDirection.Right:
-                        Console.WriteLine("la droite");
+                        Console.WriteLine("vers la droite");
                         break;
 
                     case PlayerDirection.Up:
